@@ -25,7 +25,16 @@ def sendmail(
         port,
         subject):
     from_address = from_address or user
-    content = input()
+    content = ""
+    while True:
+        try:
+            line = input()
+            if not line:
+                break
+            content += line
+        except EOFError:
+            break
+
     smtp = smtplib.SMTP(
         host=server,
         port=port,
@@ -84,11 +93,11 @@ def main():
     parser.add_argument(
         '--server',
         nargs='?',
-        required=not SERVER_ADDRESS,
+        required=not SMTP_HOST,
         metavar='S',
         type=str,
         help='smtp server address',
-        default=SERVER_ADDRESS
+        default=SMTP_HOST
     )
     parser.add_argument(
         '--password',
