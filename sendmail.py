@@ -54,23 +54,30 @@ if __name__ == '__main__':
         default=FROM_ADDRESS
     )
     parser.add_argument(
-        'subject',
+        '--subject',
         nargs="*" if SUBJECT else '+',
-        metavar='S',
+        metavar='C',
         type=str,
         help='e-mail subject',
         default=SUBJECT
     )
-    # parser.add_argument(
-    #     'server',
-    #     nargs=""
-    # )
-    # parser.add_argument(
-    #     "password",
-
-    # )
     parser.add_argument(
-        "port",
+        '--server',
+        nargs='*',
+        metavar='S',
+        type=str,
+        help='smtp server address',
+        default=SERVER_ADDRESS
+    )
+    parser.add_argument(
+        '--password',
+        nargs='*',
+        type=str,
+        help='from address password',
+        default=PASSWORD
+    )
+    parser.add_argument(
+        "--port",
         nargs="*" if SERVER_PORT else '+',
         metavar='P',
         type=int,
