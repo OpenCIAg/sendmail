@@ -21,7 +21,7 @@ publish:
   tags:
     - docker-builder
   script:
-    - docker pull ${REGISTRY}/ciag/sendmail:latest ciag/sendmail:latest
+    - docker pull ${REGISTRY}/ciag/sendmail:latest
     - docker tag ${REGISTRY}/ciag/sendmail:latest ciag/sendmail:latest
     - docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
     - docker push ciag/sendmail:latest
