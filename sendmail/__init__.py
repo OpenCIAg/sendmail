@@ -16,7 +16,7 @@ SERVER_PORT = config('SERVER_PORT', default=587, cast=int)
 SUBJECT = config('SUBJECT', default="Python SMTP")
 
 
-def main(
+def sendmail(
         from_address,
         to_address,
         server,
@@ -43,7 +43,7 @@ def main(
     smtp.send_message(email)
 
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser(description='Send SMTP e-mail')
     parser.add_argument(
         '--user',
@@ -105,9 +105,7 @@ if __name__ == '__main__':
         type=int,
         required=not SERVER_PORT,
         help='smtp server port',
-        default=SERVER_PORT
+        default=SERVER_PORT,
     )
     args = parser.parse_args()
-    print(args)
-    print(vars(args))
-    main(**vars(args))
+    sendmail(**vars(args))
