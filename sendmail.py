@@ -7,63 +7,84 @@ from string import Template
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+SMTP_USER = config('SMTP_USER', default=None)
+SMTP_PASSWORD = config('SMTP_PASSWORD', default=None)
 FROM_ADDRESS = config('FROM_ADDRESS', default=None)
 TO_ADDRESS = config('TO_ADDRESS', default=None)
-PASSWORD = config('PASSWORD',default=None)
-SERVER_ADDRESS =config('SERVER_ADDRESS',default=None)
-SERVER_PORT = config('SERVER_PORT',default=587, cast=int)
+SERVER_ADDRESS = config('SERVER_ADDRESS', default=None)
+SERVER_PORT = config('SERVER_PORT', default=587, cast=int)
 SUBJECT = config('SUBJECT', default="Python SMTP")
 
-def main(from_address, to_address, server_address, password, server_port, subject):
+
+def main(
+        from_address,
+        to_address,
+        server,
+        user,
+        password,
+        port,
+        subject):
+    from_address = from_address or user
+    content = input()
     smtp = smtplib.SMTP(
-        host=server_address,
-        port=server_port
+        host=server,
+        port=port,
     )
     smtp.starttls()
-    smtp.login(from_address, password)
+    smtp.login(user, password)
 
-    email =  MIMEMultipart()
-    email['From']=from_address
-    email['To']=";".join(to_address)
-    email['Subject']=subject
-
-    content = input()
+    email = MIMEMultipart()
+    email['From'] = from_address
+    email['To'] = ";".join(to_address)
+    email['Subject'] = subject
 
     email.attach(MIMEText(content, 'plain'))
 
     smtp.send_message(email)
-    
 
-    
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Send SMTP e-mail')
     parser.add_argument(
-        '--from-address',
-        nargs='*' if FROM_ADDRESS else '+',
+        '--user',
+        nargs='?',
         metavar='F',
+        required=not (SMTP_USER or FROM_ADDRESS),
+        type=str,
+        help='smtp user',
+        default=SMTP_USER or FROM_ADDRESS
+    )
+    parser.add_argument(
+        '--from-address',
+        nargs='?',
+        metavar='F',
+        required=False,
         type=str,
         help='from address',
-        default=FROM_ADDRESS
+        default=SMTP_USER or FROM_ADDRESS
     )
     parser.add_argument(
         '--to-address',
         nargs='+',
         metavar='T',
+        required=not TO_ADDRESS,
         type=str,
         help='to address',
-        default=FROM_ADDRESS
+        default=TO_ADDRESS
     )
     parser.add_argument(
         '--subject',
-        nargs="*" if SUBJECT else '+',
+        nargs="?",
         metavar='C',
+        required=not SUBJECT,
         type=str,
         help='e-mail subject',
         default=SUBJECT
     )
     parser.add_argument(
         '--server',
-        nargs='*',
+        nargs='?',
+        required=not SERVER_ADDRESS,
         metavar='S',
         type=str,
         help='smtp server address',
@@ -71,20 +92,22 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '--password',
-        nargs='*',
+        nargs='?',
         type=str,
+        required=not SMTP_PASSWORD,
         help='from address password',
-        default=PASSWORD
+        default=SMTP_PASSWORD
     )
     parser.add_argument(
         "--port",
-        nargs="*" if SERVER_PORT else '+',
+        nargs='?',
         metavar='P',
         type=int,
+        required=not SERVER_PORT,
         help='smtp server port',
         default=SERVER_PORT
     )
     args = parser.parse_args()
     print(args)
     print(vars(args))
-    #main(**args)
+    main(**vars(args))
