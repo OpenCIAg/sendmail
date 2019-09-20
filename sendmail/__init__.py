@@ -11,7 +11,7 @@ SMTP_USER = config('SMTP_USER', default=None)
 SMTP_PASSWORD = config('SMTP_PASSWORD', default=None)
 FROM_ADDRESS = config('FROM_ADDRESS', default=None)
 TO_ADDRESS = config('TO_ADDRESS', default=None)
-SERVER_ADDRESS = config('SERVER_ADDRESS', default=None)
+SMTP_HOST = config('SMTP_HOST', default=None)
 SERVER_PORT = config('SERVER_PORT', default=587, cast=int)
 SUBJECT = config('SUBJECT', default="Python SMTP")
 
@@ -25,13 +25,13 @@ def sendmail(
         port,
         subject):
     from_address = from_address or user
-    content = ""
+    content = []
     while True:
         try:
             line = input()
             if not line:
                 break
-            content += line
+            content.append(line)
         except EOFError:
             break
 
@@ -47,7 +47,7 @@ def sendmail(
     email['To'] = ";".join(to_address)
     email['Subject'] = subject
 
-    email.attach(MIMEText(content, 'plain'))
+    email.attach(MIMEText("\n".join(content), 'plain'))
 
     smtp.send_message(email)
 
