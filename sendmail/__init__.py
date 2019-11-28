@@ -1,3 +1,4 @@
+import os
 import smtplib
 import argparse
 from decouple import config
@@ -6,6 +7,8 @@ from string import Template
 
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
 
 SMTP_USER = config('SMTP_USER', default=None)
 SMTP_PASSWORD = config('SMTP_PASSWORD', default=None)
@@ -23,7 +26,8 @@ def sendmail(
         user,
         password,
         port,
-        subject):
+        subject,
+        attachments):
     from_address = from_address or user
     content = []
     while True:
@@ -49,6 +53,14 @@ def sendmail(
 
     email.attach(MIMEText("\n".join(content), 'plain'))
 
+    for attach in attachments:
+        abs_path = os.path.abspath(attach)
+        file_name = os.path.basename(attach)
+        part =  MIMEBase('application', 'octet-stream')
+        part.set_payload(open(abs_path,'rb').read())
+        encoders.encode_base64(part)
+        part.add_header('Content-Disposition', f'attachment; filename= {file_name}')
+        email.attach(part)
     smtp.send_message(email)
 
 
@@ -116,5 +128,18 @@ def main():
         help='smtp server port',
         default=SERVER_PORT,
     )
+    parser.add_argument(
+        "--attach",
+        dest='attachments',
+        nargs='+',
+        type=str,
+        help='attachment files',
+        required=False,
+        default=[],
+    )
     args = parser.parse_args()
     sendmail(**vars(args))
+
+
+if __name__ == '__main__':
+    main()
